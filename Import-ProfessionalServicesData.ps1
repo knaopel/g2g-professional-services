@@ -156,14 +156,18 @@ function Import-SPListContent {
                             $query = New-Object Microsoft.SharePoint.SPQuery
                             $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
                             $luItem = $luList.GetItems($query)
-                            $newItem[$colName] = $luItem
+                            if ($luItem) {
+                                $newItem[$colName] = $luItem
+                            }
                         }
                         "Vendor" {
                             $luList = $List.ParentWeb.Lists["Vendors"]
                             $query = New-Object Microsoft.SharePoint.SPQuery
                             $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
                             $luItem = $luList.GetItems($query)
-                            $newItem[$colName] = $luItem
+                            if ($luItem) {
+                                $newItem[$colName] = $luItem
+                            }
                         }
                         default {
                             $newItem[$colName] = $row[$_.ColumnName]
@@ -188,7 +192,9 @@ function Import-SPListContent {
                     } else {
                         $colName = $_.ColumnName -replace " ", ""
                     }
-                    $newItem[$colName] = $row[$_.ColumnName]
+                    if ($row[$_.ColumnName] -ne "NULL") {
+                        $newItem[$colName] = $row[$_.ColumnName]
+                    }
                 }
                 $newItem.SystemUpdate()
             }
