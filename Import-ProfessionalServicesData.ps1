@@ -174,28 +174,13 @@ function Import-SPListContent {
                     $colName = $column.ColumnName -replace " ", ""
                     switch ($colName) {
                         "Role" {
-                        <#
-                            $luList = $List.ParentWeb.Lists["Staff Roles"]
-                            $query = New-Object Microsoft.SharePoint.SPQuery
-                            $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
-                            $luItem = $luList.GetItems($query)
-                            if ($luItem) { #>
-                                $newItem[$colName] = Get-LookupValue -LookupList $List.ParentWeb.Lists["Staff Roles"] -Value $row[$column.ColumnName]
-                            <#}
-                            #>
+                            $newItem[$colName] = Get-LookupValue -LookupList $List.ParentWeb.Lists["Staff Roles"] -Value $row[$column.ColumnName]
                         }
                         "Vendor" {
                             $newItem[$colName] = Get-LookupValue -LookupList $List.ParentWeb.Lists["Vendors"] -Value $row[$column.ColumnName]
-<#                            $query = New-Object Microsoft.SharePoint.SPQuery
-                            $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
-                            $results = $luList.GetItems($query)
-                            $luItem = $results[0]
-                            if ($luItem) {
-                                $newItem[$colName] = $luItem
-                            }#>
                         }
                         default {
-                            #$newItem[$colName] = $row[$_.ColumnName]
+                            $newItem[$colName] = $row[$column.ColumnName]
                         }
                     }
 
