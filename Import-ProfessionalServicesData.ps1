@@ -105,7 +105,7 @@ function New-SPList {
                             }
                         }
 
-                        $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "false")
+                        $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "true")
                         $newField = $list.Fields[$newFieldName]
                         $newField.LookupField = $luList.Fields["Title"]
                         $newField.Update()
@@ -137,6 +137,25 @@ function New-SPList {
 	return $list
 }
 
+function Get-LookupValue {
+    param(
+    [Parameter(Mandatory = $true)]
+    [Microsoft.SharePoint.SPList]$LookupList,
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+    )
+
+    $q = New-Object Microsoft.SharePoint.SPQuery
+    $q.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $Value
+    $results = $LookupList.GetItems($q)
+    $luItem = $results[0]
+    if ($luItem) {
+        return $luItem
+    } else {
+        return $null
+    }
+}
+
 function Import-SPListContent {
     param(
     [Parameter(Mandatory = $true)]
@@ -151,28 +170,32 @@ function Import-SPListContent {
                 $row = $_
                 $newItem = $List.Items.Add()
                 $DataTable.Columns | % {
-                    $colName = $_.ColumnName -replace " ", ""
+                    $column = $_
+                    $colName = $column.ColumnName -replace " ", ""
                     switch ($colName) {
                         "Role" {
+                        <#
                             $luList = $List.ParentWeb.Lists["Staff Roles"]
                             $query = New-Object Microsoft.SharePoint.SPQuery
                             $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
                             $luItem = $luList.GetItems($query)
-                            if ($luItem) {
-                                $newItem[$colName] = $luItem
-                            }
+                            if ($luItem) { #>
+                                $newItem[$colName] = Get-LookupValue -LookupList $List.ParentWeb.Lists["Staff Roles"] -Value $row[$column.ColumnName]
+                            <#}
+                            #>
                         }
                         "Vendor" {
-                            $luList = $List.ParentWeb.Lists["Vendors"]
-                            $query = New-Object Microsoft.SharePoint.SPQuery
+                            $newItem[$colName] = Get-LookupValue -LookupList $List.ParentWeb.Lists["Vendors"] -Value $row[$column.ColumnName]
+<#                            $query = New-Object Microsoft.SharePoint.SPQuery
                             $query.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $row[$colName]
-                            $luItem = $luList.GetItems($query)
+                            $results = $luList.GetItems($query)
+                            $luItem = $results[0]
                             if ($luItem) {
                                 $newItem[$colName] = $luItem
-                            }
+                            }#>
                         }
                         default {
-                            $newItem[$colName] = $row[$_.ColumnName]
+                            #$newItem[$colName] = $row[$_.ColumnName]
                         }
                     }
 
