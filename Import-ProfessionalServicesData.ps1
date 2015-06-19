@@ -92,8 +92,7 @@ function New-SPList {
 				}
                 "VendorRates" {
                     if ($colName -match "year") {
-#                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
-                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $false)
+                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
                     } else {
  
                         switch ($colName) {
@@ -145,8 +144,38 @@ function Get-LookupValue {
     [string]$Value
     )
 
+    switch ($Value) {
+        "22 Century Technologies" {
+            $Value ="22nd Century Technologies"
+        }
+        "Commmunications Pro Inc" {
+            $Value = "Communications Professionals Inc"
+        }
+        "Lazer Tehnologies Inc" {
+            $Value = "Lazer Technologies"
+        }
+        "Metric -X LLC" {
+            $Value = "Metrix-X"
+        }
+        "NetStar Corp" {
+            $Value = "Netstar"
+        }
+        "Ramsoft Systmes Inc" {
+            $Value = "Ramsoft Systems Inc"
+        }
+        "Geographic Info Services Inc" {
+            $Value = "Geographic Information Services Inc"
+        }
+        "Metro Technology Serivces IT Inc" {
+            $Value = "Metro Technology Services IT Inc"
+        }
+        default {
+            $Value = $Value.Substring(0, $Value.Length - 4)
+        }
+    }
+
     $q = New-Object Microsoft.SharePoint.SPQuery
-    $q.Query = "<Where><Eq><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></Eq></Where>" -f $Value
+    $q.Query = "<Where><BeginsWith><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></BeginsWith></Where>" -f $Value
     $results = $LookupList.GetItems($q)
     $luItem = $results[0]
     if ($luItem) {
