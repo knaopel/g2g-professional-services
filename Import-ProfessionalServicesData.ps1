@@ -92,7 +92,8 @@ function New-SPList {
 				}
                 "VendorRates" {
                     if ($colName -match "year") {
-                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
+#                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
+                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $false)
                     } else {
  
                         switch ($colName) {
@@ -104,7 +105,7 @@ function New-SPList {
                             }
                         }
 
-                        $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "true")
+                        $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "false")
                         $newField = $list.Fields[$newFieldName]
                         $newField.LookupField = $luList.Fields["Title"]
                         $newField.Update()
@@ -128,6 +129,7 @@ function New-SPList {
 
     if ($Name -eq "VendorRates") {
         $titleField = $list.Fields["Title"]
+        $titleField.Required = $false
         $titleField.Hidden = $true
         $titleField.Update()
     }
