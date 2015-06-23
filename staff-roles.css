@@ -1,0 +1,14 @@
+@media screen and (max-width: 767px) }
+    .ui-popup-container {
+        width: 964px;
+    }
+    .ui-content.ui-popup {
+        
+    }
+}
+
+@media screen and (min-width: 767px) {
+    .ui-popup-container {
+        width: 380px !important;
+    }
+}

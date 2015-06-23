@@ -1,0 +1,68 @@
+{{: ~IncludeCSS("/Style%20Library/List%20Templates/staff-roles.css") }}
+<div data-app-id="{{:AppId}}">
+    <div id="pricing-window-{{:AppId}}" style="max-width: 100%; background-color: white; background-image: none;" data-role="popup" class="ui-content" data-theme="a" data-overlay-theme="a"></div>
+    <h2 class="mp-rteElement-H2">Staff Roles</h2>
+    <p>The following Staff Roles were provided through the Oakland County Professional Services. The Staff Role is a general description. During the X process, more specific duties and technical environments will be presented to the professional service firms during the staff requisition process.</p>
+    {{for Model ~AppId=AppId}}
+        <div data-role="collapsible">
+            <h4>{{:Title}}</h4>
+            <p><strong>Role:</strong> {{:Role}}<br/><strong>Technical Environment(s):</strong> {{:TechnicalEnvironment}}</p>
+            <a class="pricing-button" data-role="button" href="#pricing-window-{{:~AppId}}" data-id="{{:Id}}" data-transition="flip" data-rel="popup">Pricing</a>
+        </div>
+    {{/for}}
+</div>
+<script type="text/javascript">
+    G2G.Apps.Runtime['{{AppEvent Init/}}'] = function () {
+//        debugger;
+        this.$AppContainer.enhanceWithin();
+        var appId = this.PartInfo.StorageKey;
+        var $app = this.$AppContainer;
+        var templateUrl = '/Style%20Library/List%20Templates/';
+        
+        $1_10_2.views.converters({
+            currency: function (val) {
+                return "$ " + Number.parseFloat(val).toFixed(2);            
+            }
+        });
+//        this.OnPostRender();
+        
+        var lazyGetTemplate = function (name) {
+            var deferred = $1_10_2.Deferred();
+            if ($1_10_2.templates[name]) {
+                deferred.resolve();
+            } else {
+                G2G.Utilities.GetContent(templateUrl + name + '.tmpl.html', function (tmplMarkup) {
+                    $1_10_2.templates(name, tmplMarkup);
+                    deferred.resolve();
+                });
+            }
+            return deferred.promise();
+        };
+        
+        var pricingPop = function (evt) {
+            debugger;
+            var $target = $1_10_2(evt.target);
+            var roleId = $target.attr('data-id');
+            var popId = '#pricing-window-' + appId;
+            
+            G2G.Utilities.spApiJson(
+                String.format("/professional-services/_api/Web/Lists/GetByTitle('Vendor Rates')/Items/?$Select=Role/Id,Role/Title,Vendor/Id,Vendor/Title,Year1,Year2,Year3&$Expand=Role/Id,Role/Title,Vendor/Id,Vendor/Title&$Filter=Role/Id eq {0}", roleId),
+                function (data) {
+                    $1_10_2.when(lazyGetTemplate('staff-role-pricing')).done(function () {
+                        var markup = $1_10_2.render['staff-role-pricing'](data.d);
+                        $1_10_2(popId).html(markup).enhanceWithin().popup('reposition', { positionTo: 'origin' });
+                        
+                    });
+                },
+                function () {
+                    console.log("There was an error.");
+                }
+            );
+            
+//            $1_10_2(popId).html('my data is here');
+        }
+        
+        this.$AppContainer.find('.pricing-button').click(pricingPop);
+//        $1_10_2('#pricing-window-{{:AppId}}').on('popupbeforeposition', pricingPop);
+    }
+</script>

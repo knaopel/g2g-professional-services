@@ -1,0 +1,24 @@
+<a class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right" href="#" data-rel="back">Close</a>
+<h2 class="mp-rteElement-H2">Pricing for {{:results[0].Role.Title}}</h2>
+<div style="background-color: white;">
+    <table class="ui-responsive" data-role="table" data-mode="reflow">
+        <thead>
+            <tr>
+                <th>Vendor Name</th>
+                <th style="text-align: right;">Year 1</th>
+                <th style="text-align: right;">Year 2</th>
+                <th style="text-align: right;">Year 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{for results}}
+            <tr>
+                <td><a href="./Vendor-Action.aspx#{{:Vendor.Id}}">{{:Vendor.Title}}</a></td>
+                <td style="text-align: right;">{{currency:Year1}}</td>
+                <td style="text-align: right;">{{currency:Year2}}</td>
+                <td style="text-align: right;">{{currency:Year3}}</td>
+            </tr>
+            {{/for}}
+        </tbody>
+    </table>
+</div>
