@@ -155,38 +155,58 @@ function Get-LookupValue {
     [string]$Value
     )
 
+    $Value = $Value.TrimEnd()
     switch ($Value) {
         "22 Century Technologies" {
-            $Value ="22nd Century Technologies"
+            $queryValue ="22nd Century Technologies"
+        }
+        "CBI Telecommunications Consultants" {
+            $queryValue = "CBI Telecommunication Consultants"
         }
         "Commmunications Pro Inc" {
-            $Value = "Communications Professionals Inc"
-        }
-        "Lazer Tehnologies Inc" {
-            $Value = "Lazer Technologies"
-        }
-        "Metric -X LLC" {
-            $Value = "Metrix-X"
-        }
-        "NetStar Corp" {
-            $Value = "Netstar"
-        }
-        "Ramsoft Systmes Inc" {
-            $Value = "Ramsoft Systems Inc"
+            $queryValue = "Communications Professionals Inc"
         }
         "Geographic Info Services Inc" {
-            $Value = "Geographic Information Services Inc"
+            $queryValue = "Geographic Information Services Inc"
+        }
+        "Lazer Tehnologies Inc" {
+            $queryValue = "Lazer Technologies"
+        }
+        "Metric-X" {
+            $queryValue = "Metrix-X"
         }
         "Metro Technology Serivces IT Inc" {
-            $Value = "Metro Technology Services IT Inc"
+            $queryValue = "Metro Technology Services IT Inc"
+        }
+        "NetStar Corp" {
+            $queryValue = "Netstar"
+        }
+        "OMNI Computer Consultants Inc." {
+            $queryValue = "OMNI Computer Consultants"
+        }
+        "Ramsoft Systmes Inc" {
+            $queryValue = "Ramsoft Systems Inc"
+        }
+        "Real World Technologies Inc" {
+            $queryValue = "Real World Technolog"
+        }
+        "Rego Consulting Corporation" {
+            $queryValue = "Rego Consulting Corp" 
+        }
+        "Viva USA Inc." {
+            $queryValue = "Viva USA"
         }
         default {
-            $Value = $Value.Substring(0, $Value.Length - 4)
+            if ($Value.Length -gt 12) {
+                $queryValue = $Value.Substring(0, $Value.Length - 4)
+            } else {
+                $queryValue = $Value
+            }
         }
     }
 
     $q = New-Object Microsoft.SharePoint.SPQuery
-    $q.Query = "<Where><BeginsWith><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></BeginsWith></Where>" -f $Value
+    $q.Query = "<Where><BeginsWith><FieldRef Name=`"Title`" /><Value Type=`"Text`">{0}</Value></BeginsWith></Where>" -f $queryValue
     $results = $LookupList.GetItems($q)
     $luItem = $results[0]
     if ($luItem) {
@@ -212,8 +232,9 @@ function Empty-SPList {
             $batchArr += $command -f $id
         }
         $batchArr += '</Batch>'
-        $Web.ProcessBatchData($batchArr -join "")
+        $Web.ProcessBatchData($batchArr -join "") | Out-Null
         $List.Update()
+        Write-Host "`"$($List.Title)`" Emptied."
     }
 }
 
