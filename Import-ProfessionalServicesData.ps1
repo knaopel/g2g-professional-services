@@ -66,71 +66,82 @@ function New-SPList {
 	[Parameter(Mandatory = $true)]
 	[System.Data.DataColumnCollection]$Columns
 	)
+    
+    if ($Title) {
+        $listTitle = $Title 
+    } else {
+        $listTitle = $Name
+    }
 	
-	$listId = $Web.Lists.Add($Name, "Used By Professional Services", [Microsoft.SharePoint.SPListTemplateType]::GenericList)
-	
-	$list = $Web.Lists.GetList($listId, $true)
-	
-	if ($Title) {
-		$list.Title = $Title
-		$list.Update()
-	}
+    $list = $Web.Lists.TryGetList($listTitle)
+    
+    if (-not $list) {
+    	$listId = $Web.Lists.Add($Name, "Used By Professional Services", [Microsoft.SharePoint.SPListTemplateType]::GenericList)
+        
+    	$list = $Web.Lists.GetList($listId, $true)
+    	
+        if ($Title) {
+    		$list.Title = $Title
+    		$list.Update()
+    	}
 
-	$Columns | % {
-		$col = $_
-		if ($col.Ordinal -eq 0 -and $Name -ne "VendorRates") {
-			if ($col.ColumnName -ne "Title") {
-				$titleField = $list.Fields | ? { $_.InternalName -eq "Title" }
-				$titleField.Title = $col.ColumnName
-				$titleField.Update()
-			}
-		} else {
-            $colName = $col.ColumnName -replace " ", ""
-			switch ($Name) {
-                "StaffRoles" {
-                    $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Note, $false)
-				}
-                "VendorRates" {
-                    if ($colName -match "year") {
-                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
-                    } else {
- 
-                        switch ($colName) {
-                            "Role" {
-                                $luList = $Web.Lists["Staff Roles"]
+
+        $Columns | % {
+            $col = $_
+            if ($col.Ordinal -eq 0 -and $Name -ne "VendorRates") {
+                if ($col.ColumnName -ne "Title") {
+                    $titleField = $list.Fields | ? { $_.InternalName -eq "Title" }
+                    $titleField.Title = $col.ColumnName
+                    $titleField.Update()
+                }
+            } else {
+                $colName = $col.ColumnName -replace " ", ""
+                switch ($Name) {
+                    "StaffRoles" {
+                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Note, $false)
+                    }
+                    "VendorRates" {
+                        if ($colName -match "year") {
+                            $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Currency, $true)
+                        } else {
+    
+                            switch ($colName) {
+                                "Role" {
+                                    $luList = $Web.Lists["Staff Roles"]
+                                }
+                                "Vendor" {
+                                    $luList = $Web.Lists["Vendors"]
+                                }
                             }
-                            "Vendor" {
-                                $luList = $Web.Lists["Vendors"]
-                            }
+
+                            $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "true")
+                            $newField = $list.Fields[$newFieldName]
+                            $newField.LookupField = $luList.Fields["Title"]
+                            $newField.Update()
                         }
-
-                        $newFieldName = $list.Fields.AddLookup($colName, $luList.ID, "true")
-                        $newField = $list.Fields[$newFieldName]
-                        $newField.LookupField = $luList.Fields["Title"]
-                        $newField.Update()
+                    }
+                    default {
+                        $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Text, $false)
                     }
                 }
-                default {
-                    $newFieldName = $list.Fields.Add($colName, [Microsoft.SharePoint.SPFieldType]::Text, $false)
+                $list.Update()
+                if ($colName -ne $col.ColumnName) {
+                    $newField = $list.Fields[$newFieldName];
+                    $newField.Title = $col.ColumnName
+                    $newField.Update()
                 }
-			}
-			$list.Update()
-			if ($colName -ne $col.ColumnName) {
-				$newField = $list.Fields[$newFieldName];
-				$newField.Title = $col.ColumnName
-				$newField.Update()
-			}
-			$list.DefaultView.ViewFields.Add($newFieldName)
-			$list.DefaultView.Update()
-			$list.Update()
-		}
-	}
+                $list.DefaultView.ViewFields.Add($newFieldName)
+                $list.DefaultView.Update()
+                $list.Update()
+            }
+        }
 
-    if ($Name -eq "VendorRates") {
-        $titleField = $list.Fields["Title"]
-        $titleField.Required = $false
-        $titleField.Hidden = $true
-        $titleField.Update()
+        if ($Name -eq "VendorRates") {
+            $titleField = $list.Fields["Title"]
+            $titleField.Required = $false
+            $titleField.Hidden = $true
+            $titleField.Update()
+        }
     }
 
 	return $list
@@ -190,20 +201,19 @@ function Empty-SPList {
         [Parameter(Mandatory = $true)]
         [Microsoft.SharePoint.SPWeb]$Web,
         [Parameter(Mandatory = $true)]
-        [string]$Name
+        [Microsoft.SharePoint.SPList]$List
     )
 
-    $list = $Web.Lists[$Name]
-    if ($list) {
+    if ($List) {
         $command = "<Method><SetList Scope=`"Request`">$($list.ID)</SetList><SetVar Name=`"Cmd`">Delete</SetVar><SetVar Name=`"ID`">{0}</SetVar></Method>"
         $batchArr = '<?xml version="1.0" encoding="UTF-8"?>','<Batch>'
-        $list.Items | Select Id | % {
+        $List.Items | Select Id | % {
             $id = $_.Id
             $batchArr += $command -f $id
         }
         $batchArr += '</Batch>'
         $Web.ProcessBatchData($batchArr -join "")
-        $list.Update()
+        $List.Update()
     }
 }
 
@@ -299,7 +309,7 @@ $sheets | % {
 	$l = New-SPList -Web $w -Name $listName -Title $listTitle -Columns $dataTable.Columns
 
     #empty list if exists
-    Empty-SPList -Web $w -Name $listName
+    Empty-SPList -Web $w -List $l
 	
     Import-SPListContent -List $l -DataTable $dataTable
 }
