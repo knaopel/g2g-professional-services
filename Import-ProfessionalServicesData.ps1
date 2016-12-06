@@ -185,6 +185,28 @@ function Get-LookupValue {
     }
 }
 
+function Empty-SPList {
+    param(
+        [Parameter(Mandatory = $true)]
+        [Microsoft.SharePoint.SPWeb]$Web,
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+
+    $list = $Web.Lists[$Name]
+    if ($list) {
+        $command = "<Method><SetList Scope=`"Request`">$($list.ID)</SetList><SetVar Name=`"Cmd`">Delete</SetVar><SetVar Name=`"ID`">{0}</SetVar></Method>"
+        $batchArr = '<?xml version="1.0" encoding="UTF-8"?>','<Batch>'
+        $list.Items | Select Id | % {
+            $id = $_.Id
+            $batchArr += $command -f $id
+        }
+        $batchArr += '</Batch>'
+        $Web.ProcessBatchData($batchArr -join "")
+        $list.Update()
+    }
+}
+
 function Import-SPListContent {
     param(
     [Parameter(Mandatory = $true)]
@@ -272,8 +294,12 @@ $sheets | % {
 	$listName = $_ -replace "_", ""
 	$listTitle = $_ -replace "_", " "
 	
+    
 	#create list if it doesn't exist
 	$l = New-SPList -Web $w -Name $listName -Title $listTitle -Columns $dataTable.Columns
+
+    #empty list if exists
+    Empty-SPList -Web $w -Name $listName
 	
     Import-SPListContent -List $l -DataTable $dataTable
 }
