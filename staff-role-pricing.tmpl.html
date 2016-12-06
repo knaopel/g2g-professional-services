@@ -1,22 +1,28 @@
 <a class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right" href="#" data-rel="back">Close</a>
 <h2 class="mp-rteElement-H2">Pricing for {{:results[0].Role.Title}}</h2>
 <div style="background-color: white;">
-    <table class="ui-responsive" data-role="table" data-mode="reflow">
+    <table class="ui-responsive" data-role="table" data-mode="reflow" style="max-width:100%">
         <thead>
             <tr>
                 <th>Vendor Name</th>
-                <th style="text-align: right;">Year 1</th>
-                <th style="text-align: right;">Year 2</th>
-                <th style="text-align: right;">Year 3</th>
+                <th class="pricing-currency">Year 1</th>
+                <th class="pricing-currency">Year 2</th>
+                <th class="pricing-currency">Year 3</th>
+                <th>Vendor Contact</th>
+                <th>Vendor email</th>
+                <th>Primary Phone</th>
             </tr>
         </thead>
         <tbody>
             {{for results}}
             <tr>
-                <td><a href="./Vendor-Action.aspx#{{:Vendor.Id}}">{{:Vendor.Title}}</a></td>
-                <td style="text-align: right;">{{currency:Year1}}</td>
-                <td style="text-align: right;">{{currency:Year2}}</td>
-                <td style="text-align: right;">{{currency:Year3}}</td>
+                <td>{{:Vendor.Title}}</td>
+                <td class="pricing-currency">{{currency:Year1}}</td>
+                <td class="pricing-currency">{{currency:Year2}}</td>
+                <td class="pricing-currency">{{currency:Year3}}</td>
+                <td>{{:Vendor.FirstName}} {{:Vendor.LastName}}</td>
+                <td><a href="mailto:{{:Vendor.email}}?subject={{:Role.Title}} on G2G Marketplace">{{:Vendor.email}}</a></td>
+                <td>{{:Vendor.Phone}}</td>
             </tr>
             {{/for}}
         </tbody>
