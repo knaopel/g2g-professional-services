@@ -20,3 +20,7 @@
 .pricing-window tbody tr:nth-child(2n) {
 	background: #EEE;
 }
+
+.pricing-window div.download-note {
+	text-align: center !important;
+}
