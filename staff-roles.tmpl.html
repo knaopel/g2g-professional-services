@@ -29,7 +29,15 @@
                 return "$ " + parseFloat(val).toFixed(2);            
             }
         });
-        
+        var isIE = function() {
+        	var ua = window.navigator.userAgent;
+			var msie = ua.indexOf("MSIE ");
+			if (msie != -1 || navigator.userAgent.match(/Trident.*rv\:11\./)) {
+				return true;
+			} else {
+				return false;
+			}         
+        };
         var lazyGetTemplate = function (name) {
             var deferred = $1_10_2.Deferred();
             if ($1_10_2.templates[name]) {
@@ -57,12 +65,52 @@
         			$1_10_2.when(lazyGetTemplate('staff-role-pricing')).done( function () {
         				var markup = $1_10_2.render['staff-role-pricing'](data.d);
         				$1_10_2(popId).html(markup).enhanceWithin();
+        				$1_10_2(popId).find('button').click(function(evnt, ui){
+        					// debugger;
+        					var targetData = $1_10_2(evnt.target).data();
+        					
+        					downloadData(data.d, targetData.type);
+        				});
+        				// debugger;
         				deferred.resolve();
         			});
         		}
         	);
         	return deferred;
         };
+        
+        var downloadData = function (data, format) {
+//        	G2G.Utilities.loadScript('//cdn.jsdelivr.net/alasql/0.3/alasql.min.js', function() {
+        		//G2G.Utilities.loadScript('//cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.core.min.js', function () {
+        			var isCsv = (format === 'csv')
+        			var templateName = isCsv ? 'staff-role-pricing-csv' : 'staff-role-pricing-data';
+        			var mimetype = isCsv ? 'text/csv;charset-utf-8' : 'application/vnd.ms-excel';
+        			var fileExt = isCsv ? '.csv' : '.html';
+		            $1_10_2.when(lazyGetTemplate(templateName)).done(function() {
+		            	// debugger;
+		                var markup = $1_10_2.render[templateName](data);
+						var content = isCsv ? encodeURI(markup) : escape(markup);
+		                var filename = 'pricing-for-' + data.results[0].Role.Title.replace(/[ &/:]/g, '-') + fileExt;
+						if(isIE()) {
+							var ieWindow = window.open();
+							ieWindow.document.write('sep=,\r\n' + content);
+							ieWindow.document.close();
+							ieWindow.document.execCommand('SaveAs', true, filename);
+//			                window.open('data:' + mimetype + ',' + content);
+						} else {
+			                var link = document.createElement("a");
+			                link.setAttribute('href', 'data:' + mimetype + ',' + content);
+			                link.setAttribute('download', filename);
+			                link.setAttribute('class', 'oc-go-jump');
+							document.body.appendChild(link);
+		    	            link.click();
+						} 
+		            });
+		            
+	            //});
+            //});
+        };
+
         
         var pricingPop = function (evt) {
             var $target = $1_10_2(evt.target);
@@ -73,7 +121,7 @@
 	        });
         };
 
-        populatePricing(data.d.results[0].Id);
+        populatePricing();
         
         this.$AppContainer.find('.pricing-button').click(pricingPop);
     }
