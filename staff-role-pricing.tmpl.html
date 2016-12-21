@@ -1,7 +1,9 @@
 <a class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right" href="#" data-rel="back">Close</a>
 <h2 class="mp-rteElement-H2">Pricing for {{:results[0].Role.Title}}</h2>
 <div style="background-color: white;">
-    <table class="ui-responsive" data-role="table" data-mode="reflow" style="max-width:100%">
+	<a class="ui-btn ui-btn-c ui-btn-inline download-data" href="#"> <i class="fa fa-file-excel-o"></i> Download Data</a>
+	<span class="no-download-data"><em>Download function is only available from a computer.</em></span>
+    <table class="g2g-responsive" data-role="table" data-mode="reflow" style="max-width:100%">
         <thead>
             <tr>
                 <th>Vendor Name</th>
@@ -9,7 +11,7 @@
                 <th class="pricing-currency">Year 2</th>
                 <th class="pricing-currency">Year 3</th>
                 <th>Vendor Contact</th>
-                <th>Vendor email</th>
+                <th>Vendor Email</th>
                 <th>Primary Phone</th>
             </tr>
         </thead>
@@ -27,8 +29,4 @@
             {{/for}}
         </tbody>
     </table>
-    <fieldset class="ui-grid-a">
-        <button class="ui-block-a" type="button" data-type="csv">download data (CSV)</button>
-        <button class="ui-block-b" type="button" data-type="html">download data (HTML)</button>
-    </fieldset>
 </div>

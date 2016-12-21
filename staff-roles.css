@@ -1,22 +1,49 @@
-@media screen and (max-width: 767px) {
+@media screen and (min-width: 49em) {
+	.ui-table-reflow.g2g-responsive td,
+	.ui-table-reflow.g2g-responsive th,
+	.ui-table-reflow.g2g-responsive tbody td,
+	.ui-table-reflow.g2g-responsive tbody th,
+	.ui-table-reflow.g2g-responsive thead td,
+	.ui-table-reflow.g2g-responsive thead th {
+		display: table-cell;
+		margin: 0;
+	}
+	
+	.ui-table-reflow.g2g-responsive td .ui-table-cell-label,
+	.ui-table-reflow.g2g-responsive th .ui-table-cell-label {
+		display: none;
+	}	
+}
+
+.ui-popup-container {
+    width: 380px;
+}
+
+@media screen and (min-width: 49em) {
     .ui-popup-container {
         width: 964px;
     }
-}
-
-@media screen and (min-width: 767px) {
-    .ui-popup-container {
-        width: 380px !important;
-    }
-}
-
-@media screen and (min-width: 35em) {
 	.pricing-currency {
 		text-align: right !important;
-		/*white-space: nowrap;*/	
+		white-space: nowrap;	
 	}
 }
 
+.g2g-device-desktop .no-download-data {
+	visibility: hidden;
+}
+
+.g2g-device-mobile .no-download-data {
+	visibility: visible;
+}
+.g2g-device-mobile .download-data, .g2g-device-tablet .download-data {
+	visibility: hidden;
+	display: none;
+}
 .pricing-window tbody tr:nth-child(2n) {
 	background: #EEE;
+}
+
+.pricing-window div.download-note {
+	text-align: center !important;
 }

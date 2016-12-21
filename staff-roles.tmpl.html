@@ -1,43 +1,49 @@
 {{: ~IncludeCSS("/Style%20Library/List%20Templates/staff-roles.css") }}
+{{: ~IncludeScript("//use.fontawesome.com/b992b426b8.js") }}
 <div data-app-id="{{:AppId}}">
-    <div id="pricing-window-{{:AppId}}" style="background-color: white; background-image: none;" data-role="popup" class="ui-content pricing-window"
-        data-theme="a" data-overlay-theme="a"></div>
-    <h2 class="mp-rteElement-H2">Staff Roles</h2>
-    <p>The following Staff Roles were provided through the Oakland County Professional Services. The Staff Role is a general
-        description. During the X process, more specific duties and technical environments will be presented to the professional
-        service firms during the staff requisition process.</p>
+    <div id="pricing-window-{{:AppId}}" style="background-color: white; background-image: none;" data-role="popup" class="ui-content pricing-window" data-theme="a" data-overlay-theme="a"></div>
     {{for Model ~AppId=AppId}}
     <div data-role="collapsible">
         <h4>{{:Title}}</h4>
         <p><strong>Role:</strong> {{:Role}}<br/><strong>Technical Environment(s):</strong> {{:TechnicalEnvironment}}</p>
         <a class="pricing-button" data-role="button" href="#pricing-window-{{:~AppId}}" data-id="{{:Id}}" data-transition="flip"
-            data-rel="popup" data-position-to="window">Pricing</a>
+        data-rel="popup" data-position-to="window">Pricing</a>
     </div>
     {{/for}}
 </div>
 <script type="text/javascript">
     G2G.Apps.Runtime['{{AppEvent Init/}}'] = function () {
-		var self = this;
+        var self = this;
         this.$AppContainer.enhanceWithin();
         var appId = this.PartInfo.StorageKey;
         var popId = '#pricing-window-' + appId;
         var $app = this.$AppContainer;
         var templateUrl = '/Style%20Library/List%20Templates/';
-        
+
         $1_10_2.views.converters({
             currency: function (val) {
-                return "$ " + parseFloat(val).toFixed(2);            
+                return "$ " + parseFloat(val).toFixed(2);
             }
         });
-        var isIE = function() {
-        	var ua = window.navigator.userAgent;
-			var msie = ua.indexOf("MSIE ");
-			if (msie != -1 || navigator.userAgent.match(/Trident.*rv\:11\./)) {
-				return true;
-			} else {
-				return false;
-			}         
+
+        var isIE = function () {
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+            return (msie != -1 || navigator.userAgent.match(/Trident.*rv\:11\./));
         };
+
+        var isSafariMac = function () {
+            var ua = navigator.userAgent;
+            return (ua.match(/Macintosh/) && ua.match(/Safari/));
+        };
+
+        var ieHandleClick = function (csvData, filename) {
+            var ieWindow = window.open();
+            ieWindow.document.write('sep=,\r\n' + csvData);
+            ieWindow.document.close();
+            ieWindow.document.execCommand('SaveAs', true, filename);
+        };
+
         var lazyGetTemplate = function (name) {
             var deferred = $1_10_2.Deferred();
             if ($1_10_2.templates[name]) {
@@ -50,79 +56,66 @@
             }
             return deferred.promise();
         };
-        
-        var populatePricing = function(roleId) {
-        	var deferred = $1_10_2.Deferred();
+
+        var populatePricing = function (roleId) {
+            var deferred = $1_10_2.Deferred();
             var apiUrl;
             if (roleId) {
                 apiUrl = String.format("/professional-services/_api/Web/Lists/GetByTitle('Vendor Rates')/Items/?$Select=Role/Id,Role/Title,Vendor/Id,Vendor/Title,Vendor/FirstName,Vendor/LastName,Vendor/email,Vendor/Phone,Vendor/SecondaryPhone,Year1,Year2,Year3&$Expand=Role,Vendor&$Filter=Role/Id eq {0}", roleId);
             } else {
                 apiUrl = "/professional-services/_api/Web/Lists/GetByTitle('Vendor Rates')/Items/?$Select=Role/Id,Role/Title,Vendor/Id,Vendor/Title,Vendor/FirstName,Vendor/LastName,Vendor/email,Vendor/Phone,Vendor/SecondaryPhone,Year1,Year2,Year3&$Expand=Role,Vendor&$Top=1"
             }
-        	G2G.Utilities.spApiJson(
-        		apiUrl,
-        		function (data) {
-        			$1_10_2.when(lazyGetTemplate('staff-role-pricing')).done( function () {
-        				var markup = $1_10_2.render['staff-role-pricing'](data.d);
-        				$1_10_2(popId).html(markup).enhanceWithin();
-        				$1_10_2(popId).find('button').click(function(evnt, ui){
-        					// debugger;
-        					var targetData = $1_10_2(evnt.target).data();
-        					
-        					downloadData(data.d, targetData.type);
-        				});
-        				// debugger;
-        				deferred.resolve();
-        			});
-        		}
-        	);
-        	return deferred;
-        };
-        
-        var downloadData = function (data, format) {
-//        	G2G.Utilities.loadScript('//cdn.jsdelivr.net/alasql/0.3/alasql.min.js', function() {
-        		//G2G.Utilities.loadScript('//cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.core.min.js', function () {
-        			var isCsv = (format === 'csv')
-        			var templateName = isCsv ? 'staff-role-pricing-csv' : 'staff-role-pricing-data';
-        			var mimetype = isCsv ? 'text/csv;charset-utf-8' : 'application/vnd.ms-excel';
-        			var fileExt = isCsv ? '.csv' : '.html';
-		            $1_10_2.when(lazyGetTemplate(templateName)).done(function() {
-		            	// debugger;
-		                var markup = $1_10_2.render[templateName](data);
-						var content = isCsv ? encodeURI(markup) : escape(markup);
-		                var filename = 'pricing-for-' + data.results[0].Role.Title.replace(/[ &/:]/g, '-') + fileExt;
-						if(isIE()) {
-							var ieWindow = window.open();
-							ieWindow.document.write('sep=,\r\n' + content);
-							ieWindow.document.close();
-							ieWindow.document.execCommand('SaveAs', true, filename);
-//			                window.open('data:' + mimetype + ',' + content);
-						} else {
-			                var link = document.createElement("a");
-			                link.setAttribute('href', 'data:' + mimetype + ',' + content);
-			                link.setAttribute('download', filename);
-			                link.setAttribute('class', 'oc-go-jump');
-							document.body.appendChild(link);
-		    	            link.click();
-						} 
-		            });
-		            
-	            //});
-            //});
+            G2G.Utilities.spApiJson(
+                apiUrl,
+                function (data) {
+                    $1_10_2.when(lazyGetTemplate('staff-role-pricing'), lazyGetTemplate('staff-role-pricing-csv')).done(function () {
+                        var markup = $1_10_2.render['staff-role-pricing'](data.d);
+                        var csv = $1_10_2.render['staff-role-pricing-csv'](data.d);
+                        var filename = 'pricing-for-' + data.d.results[0].Role.Title.replace(/[ &/:]/g, '-') + '.csv';
+                        var csvData = 'data:text/csv;charset-utf-8,' + encodeURI(csv);
+
+                        $1_10_2(popId).html(markup).enhanceWithin();
+
+                        var $downloadLink = $1_10_2(popId).find('a.download-data');
+                        if (isIE()) {
+                            $downloadLink.click(function () {
+                                ieHandleClick(csv, filename);
+                            });
+                        } else {
+                            $downloadLink.attr('href', csvData);
+                            $downloadLink.attr('download', filename);
+                            if (isSafariMac()) {
+                                var $note = $1_10_2('<em>');
+
+                                $note.html('Choose &quot;Download Linked File As...&quot; to save the file.');
+                                $downloadLink.after($note);
+                            }
+                        }
+
+                        $1_10_2(popId).find('button').click(function (evnt, ui) {
+                            // debugger;
+                            var targetData = $1_10_2(evnt.target).data();
+
+                            downloadData(data.d, targetData.type);
+                        });
+                        deferred.resolve();
+                    });
+                }
+            );
+            return deferred;
         };
 
-        
         var pricingPop = function (evt) {
             var $target = $1_10_2(evt.target);
             var roleId = $target.attr('data-id');
-            
-            populatePricing(roleId).then(function () {            
-	            $1_10_2(popId).popup('open', { positionTo: 'window' });
-	        });
+
+            populatePricing(roleId).then(function () {
+                $1_10_2(popId).popup('open', { positionTo: 'window' });
+            });
         };
 
-        populatePricing();
-        
+        //populatePricing();
+
         this.$AppContainer.find('.pricing-button').click(pricingPop);
     }
 </script>
