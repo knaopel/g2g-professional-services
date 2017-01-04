@@ -1,4 +1,4 @@
-{{: ~IncludeCSS("/Style%20Library/List%20Templates/staff-roles.css") }}
+{{: ~IncludeCSS("/Style%20Library/List%20Templates/staff-roles.css?rev=2") }}
 {{: ~IncludeScript("//use.fontawesome.com/b992b426b8.js") }}
 <div data-app-id="{{:AppId}}">
     <div id="pricing-window-{{:AppId}}" style="background-color: white; background-image: none;" data-role="popup" class="ui-content pricing-window" data-theme="a" data-overlay-theme="a"></div>
@@ -71,7 +71,7 @@
                     $1_10_2.when(lazyGetTemplate('staff-role-pricing'), lazyGetTemplate('staff-role-pricing-csv')).done(function () {
                         var markup = $1_10_2.render['staff-role-pricing'](data.d);
                         var csv = $1_10_2.render['staff-role-pricing-csv'](data.d);
-                        var filename = 'pricing-for-' + data.d.results[0].Role.Title.replace(/[ &/:]/g, '-') + '.csv';
+                        var filename = 'Pricing-for-' + data.d.results[0].Role.Title.replace(/[ &/:]/g, '-') + '.csv';
                         var csvData = 'data:text/csv;charset-utf-8,' + encodeURI(csv);
 
                         $1_10_2(popId).html(markup).enhanceWithin();
