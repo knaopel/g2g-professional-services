@@ -1,4 +1,5 @@
 {{: ~IncludeCSS("/Style%20Library/List%20Templates/staff-roles.css?rev=2") }}
+{{: ~IncludeScript("/Style%20Library/js/xlsx.core.min.js") }}
 {{: ~IncludeScript("//use.fontawesome.com/b992b426b8.js") }}
 <div data-app-id="{{:AppId}}">
     <div id="pricing-window-{{:AppId}}" style="background-color: white; background-image: none;" data-role="popup" class="ui-content pricing-window" data-theme="a" data-overlay-theme="a"></div>
@@ -25,6 +26,10 @@
                 return "$ " + parseFloat(val).toFixed(2);
             }
         });
+        
+        var exportDataToExcel = function(data) {
+        	
+        };
 
         var isIE = function () {
             var ua = window.navigator.userAgent;
@@ -93,7 +98,7 @@
                         }
 
                         $1_10_2(popId).find('button').click(function (evnt, ui) {
-                            // debugger;
+                            debugger;
                             var targetData = $1_10_2(evnt.target).data();
 
                             downloadData(data.d, targetData.type);
