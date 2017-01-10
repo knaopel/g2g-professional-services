@@ -25,7 +25,7 @@ module.exports = function (grunt) {
             dev: {
                 options: {
                     position: 'top',
-                    banner: '<%= meta.banner %>\n"use strict";\n\n' +
+                    banner: '<%= meta.banner %>\n\n' +
                     '/***************************\n' +
                     ' **  FOR DEBUGGING ONLY   **\n' +
                     ' **************************/\n'
@@ -43,7 +43,7 @@ module.exports = function (grunt) {
             options: {
                 force: true
             },
-            files: ['<%= meta.distPath %>\\']
+            files: ['<%= meta.distPath %>\\*.*']
         },
 
         // BUMP
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
                 files: {
                     '<%= meta.distPath %>\\G2G.Apps.ContentSection.Extensions.js': [
                         '<%= meta.nodeModPath %>\\file-saver\\FileSaver.js',
-                        '<%= meta.nodeModPath %>\\xlsx\\xslx.js',
+                        '<%= meta.nodeModPath %>\\xlsx\\dist\\xlsx.core.min.js',
                         '<%= meta.srcPath %>\\G2G.Apps.ContentSection.Extensions.js'
 
                     ]
