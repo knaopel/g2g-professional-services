@@ -1,0 +1,17 @@
+{
+  "name": "g2g-professional-services",
+  "version": "0.0.8",
+  "description": "Professional Services Mini site",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knaopel/g2g-professional-services.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/knaopel/g2g-professional-services/issues"
+  },
+  "homepage": "https://github.com/knaopel/g2g-professional-services#readme"
+}
