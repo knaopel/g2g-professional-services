@@ -1,9 +1,8 @@
 {
   "name": "g2g-professional-services",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Professional Services Mini site",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/knaopel/g2g-professional-services.git"
@@ -13,5 +12,15 @@
   "bugs": {
     "url": "https://github.com/knaopel/g2g-professional-services/issues"
   },
-  "homepage": "https://github.com/knaopel/g2g-professional-services#readme"
+  "homepage": "https://github.com/knaopel/g2g-professional-services#readme",
+  "devDependencies": {
+    "file-saver": "^1.3.3",
+    "grunt": "^1.0.1",
+    "grunt-banner": "^0.6.0",
+    "grunt-bump": "^0.8.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "xlsx": "^0.8.1"
+  }
 }
