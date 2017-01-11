@@ -33,6 +33,15 @@ module.exports = function (grunt) {
                 files: {
                     src: ['<%= meta.distPath %>\\*.js']
                 }
+            },
+            dist: {
+                options: {
+                    position: 'top',
+                    banner: '<%= meta.banner %>\n\n'
+                },
+                files: {
+                    src: ['<%= meta.distPath %>\\*.js']
+                }
             }
         },
 
@@ -69,7 +78,15 @@ module.exports = function (grunt) {
                         '<%= meta.nodeModPath %>\\file-saver\\FileSaver.js',
                         '<%= meta.nodeModPath %>\\xlsx\\dist\\xlsx.core.min.js',
                         '<%= meta.srcPath %>\\G2G.Apps.ContentSection.Extensions.js'
-
+                    ]
+                }
+            },
+            dist:{
+                files:{
+                    '<%= meta.distPath %>\\G2G.Apps.ContentSection.Extensions.js': [
+                        '<%= meta.nodeModPath %>\\file-saver\\FileSaver.min.js',
+                        '<%= meta.nodeModPath %>\\xlsx\\dist\\xlsx.core.min.js',
+                        '<%= meta.srcPath %>\\G2G.Apps.ContentSection.Extensions.js'
                     ]
                 }
             }
@@ -87,7 +104,38 @@ module.exports = function (grunt) {
                     dest: '<%= meta.distPath %>\\'
                 }]
             }
+        },
+
+        // UGLIFY
+        //-----------------------------------------------
+        // https://npmjs.org/package/grunt-contrib-uglify
+        uglify: {
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= meta.distPath %>',
+                    src: ['**\\*.js'],
+                    dest: '<%= meta.distPath %>'
+                }]
+            }
+        },
+
+        // CSSMIN
+        // ----------------------------------------------
+        // https://www.npmjs.org/package/grunt-contrib-cssmin
+        cssmin: {
+            dist: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= meta.distPath %>',
+                        src: ['**\\*.css', '!*.min.css'],
+                        dest: '<%= meta.distPath %>'
+                    }
+                ]
+            }
         }
+
     });
 
     grunt.loadNpmTasks('grunt-banner');
@@ -95,6 +143,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('default', ['clean', 'copy', 'concat', 'usebanner:dev']);
+    grunt.registerTask('default', ['clean', 'copy', 'concat:dev', 'usebanner:dev']);
+    grunt.registerTask('dist', ['clean', 'copy', 'concat:dist', 'uglify', 'usebanner:dist', 'cssmin']);
 };
