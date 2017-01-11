@@ -8,9 +8,9 @@ G2G.Utilities.Cell = function (obj) {
 	if (!obj) {
 		var obj = {};
 	}
-	this.v = obj.v || null;
-	this.t = obj.t || '';
-	this.z = obj.z || null;
+	this.v = obj.v || '';
+	this.t = obj.t || 's';
+	this.z = obj.z || XLSX.SSF._table[0];
 };
 
 G2G.Utilities.S2Abs = function (s) {
@@ -64,7 +64,7 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 		var ws = { '!merges': [] };
 		var range = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } };
 		var headings = ['Vendor Name', 'Year 1', 'Year 2', 'Year 3', 'Vendor Contact', 'Vendor Email', 'Primary Phone'];
-		var fields = ['Vendor.Title', 'Year1', 'Year2', 'Year3', ['Vendor.FirstName', 'Vendor.LastName'], 'Vendor.Email', 'Vendor.Phone'];
+		var fields = ['Vendor.Title', 'Year1', 'Year2', 'Year3', ['Vendor.FirstName', 'Vendor.LastName'], 'Vendor.email', 'Vendor.Phone'];
 
 		// insert row 0
 		var cell = new G2G.Utilities.Cell({ v: sheetTitle, t: 's' });
@@ -81,35 +81,49 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 			ws[cellRef] = hCell;
 		});
 
-		// range.e.c = 0;
+		range.e.c = 0;
 
-		// data.forEach(function (row) {
-		// 	range.e.r++;
-		// 	fields.forEach(function (field, idx) {
-		// 		range.e.c = idx;
-		// 		var val = '', type = '';
+		data.forEach(function (row) {
+			range.e.r++;
+			fields.forEach(function (field, idx) {
+				range.e.c = idx;
+				var val = '', type = '', format = null;
 
-		// 		if (field.indexOf('.') < 0) {
-		// 			val = row[field];
-		// 		} else {
-		// 			field = field.split('.');
-		// 			val = row[field[0]][field[1]];
-		// 		}
+				if (Array.isArray(field)) {
+					// contact name
+					var fnField = field[0].split('.');
+					var lnField = field[1].split('.');
+					val = row[fnField[0]][fnField[1]] + ' ' + row[lnField[0]][lnField[1]];
+				} else {
+					if (field.indexOf('.') < 0) {
+						val = row[field];
+					} else {
+						field = field.split('.');
+						val = row[field[0]][field[1]];
+					}
+				}
 
-		// 		if (typeof val === 'number') {
-		// 			type = 'n';
-		// 		} else {
-		// 			type = 's';
-		// 		}
 
-		// 		var rowCell = new G2G.Utilities.Cell({
-		// 			v: val,
-		// 			t: type
-		// 		});
-		// 		cellRef = XLSX.utils.encode_cell({ c: range.e.c, r: range.e.r });
-		// 		ws[cellRef] = rowCell;
-		// 	});
-		// });
+				if (typeof val === 'number') {
+					// price
+					type = 'n';
+					format = XLSX.SSF._table[40];
+				} else {
+					type = 's';
+				}
+
+				var rowCell = new G2G.Utilities.Cell({
+					v: val,
+					t: type,
+					z: format
+				});
+				if (field === 'Vendor.email') {
+					rowCell.l = [{ Target: 'mailto:' + val }];
+				}
+				cellRef = XLSX.utils.encode_cell({ c: range.e.c, r: range.e.r });
+				ws[cellRef] = rowCell;
+			});
+		});
 
 		ws['!ref'] = XLSX.utils.encode_range(range);
 
@@ -147,11 +161,6 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 	// var _data = [[this.GetSheetTitle(data.results[0].Role.Title)], ["Vendor Name", "Year 1", "Year 2", "Year 3", "Vendor Contact", "Vendor Email", "Primary Phone"], [true, false, null, "sheetjs"], ["foo", "bar", new Date("2014-02-19T14:30Z"), "0.3"], ["baz", null, "qux"]];
 	var ws_name = this.GetSheetTitle(data.results[0].Role.Title, 'sheetName');
 	var sheetTitle = this.GetSheetTitle(data.results[0].Role.Title);
-	// function Workbook() {
-	// 	if (!(this instanceof Workbook)) return new Workbook();
-	// 	this.SheetNames = [];
-	// 	this.Sheets = {};
-	// }
 
 	var wb = new G2G.Utilities.Workbook(), ws = sheet_from_array_of_arrays(data.results, sheetTitle);
 
@@ -160,24 +169,8 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 
 	var wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
 
-	// function s2abs(s) {
-	// 	var buf = new ArrayBuffer(s.length);
-	// 	var view = new Uint8Array(buf);
-	// 	for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-	// 	return buf;
-	// }
-
 	saveAs(new Blob([G2G.Utilities.S2Abs(wbout)], { type: "application/octet-stream" }), this.GetSheetTitle(data.results[0].Role.Title, 'fileName') + ".xlsx");
 
-	// var title = this.GetSheetTitle(data.results[0].Role.Title);
-	// // create object for worksheet
-	// var ws = {};
-	// var range = { s: { c: 1, r: 1 }, e: { c: 0, r: 0 } };
-	// var cellRef = XLSX.utils.encode_cell({ c: 0, r: 0 });
-	// var cell = { v: title, t: 's' };
-	// ws[cellRef] = cell;
-	// ws['!ref'] = XLSX.utils.encode_range(range);
-	// return ws;
 };
 
 G2G.Apps.ContentSection.prototype.ExportWorksheetToExcel = function (ws, sheetTitle) {
