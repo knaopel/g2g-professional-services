@@ -4,6 +4,15 @@ G2G.Utilities.Workbook = function () {
 	this.Sheets = {};
 };
 
+G2G.Utilities.Cell = function (obj) {
+	if (!obj) {
+		var obj = {};
+	}
+	this.v = obj.v || null;
+	this.t = obj.t || '';
+	this.z = obj.z || null;
+};
+
 G2G.Utilities.S2Abs = function (s) {
 	var buff = new ArrayBuffer(s.length);
 	var view = new Uint8Array(buff);
@@ -51,27 +60,55 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 		return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
 	}
 
-	function sheet_from_array_of_arrays(data, opts) {
+	function sheet_from_array_of_arrays(data, sheetTitle) {
 		var ws = { '!merges': [] };
 		var range = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } };
+		var headings = ['Vendor Name', 'Year 1', 'Year 2', 'Year 3', 'Vendor Contact', 'Vendor Email', 'Primary Phone'];
+		var fields = ['Vendor.Title', 'Year1', 'Year2', 'Year3', ['Vendor.FirstName', 'Vendor.LastName'], 'Vendor.Email', 'Vendor.Phone'];
 
 		// insert row 0
-		var cell = { v: 'Pricing for ROle Titkle', t: 's' };
+		var cell = new G2G.Utilities.Cell({ v: sheetTitle, t: 's' });
 		var cellRef = XLSX.utils.encode_cell({ c: 0, r: 0 });
 		ws[cellRef] = cell;
 		ws['!merges'].push({ e: { c: 3, r: 0 }, s: { c: 0, r: 0 } });
 
 		// Heading row
 		range.e.r++;
-		cell.v = 'Vendor Name';
-		cellRef = XLSX.utils.encode_cell({ c: range.e.c, r: range.e.r });
-		ws[cellRef] = cell;
+		headings.forEach(function (head, idx) {
+			range.e.c = idx;
+			var hCell = new G2G.Utilities.Cell({ v: head, t: 's' });
+			cellRef = XLSX.utils.encode_cell({ c: range.e.c, r: range.e.r });
+			ws[cellRef] = hCell;
+		});
+
+		// range.e.c = 0;
 
 		// data.forEach(function (row) {
-		// 	range.s.r++;
-		// 	cell.v = row.Vendor.Title;
-		// 	cellRef = XLSX.utils.encode_cell({ c: range.s.c, r: range.s.r });
-		// 	ws[cellRef] = cell;
+		// 	range.e.r++;
+		// 	fields.forEach(function (field, idx) {
+		// 		range.e.c = idx;
+		// 		var val = '', type = '';
+
+		// 		if (field.indexOf('.') < 0) {
+		// 			val = row[field];
+		// 		} else {
+		// 			field = field.split('.');
+		// 			val = row[field[0]][field[1]];
+		// 		}
+
+		// 		if (typeof val === 'number') {
+		// 			type = 'n';
+		// 		} else {
+		// 			type = 's';
+		// 		}
+
+		// 		var rowCell = new G2G.Utilities.Cell({
+		// 			v: val,
+		// 			t: type
+		// 		});
+		// 		cellRef = XLSX.utils.encode_cell({ c: range.e.c, r: range.e.r });
+		// 		ws[cellRef] = rowCell;
+		// 	});
 		// });
 
 		ws['!ref'] = XLSX.utils.encode_range(range);
@@ -109,14 +146,14 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 
 	// var _data = [[this.GetSheetTitle(data.results[0].Role.Title)], ["Vendor Name", "Year 1", "Year 2", "Year 3", "Vendor Contact", "Vendor Email", "Primary Phone"], [true, false, null, "sheetjs"], ["foo", "bar", new Date("2014-02-19T14:30Z"), "0.3"], ["baz", null, "qux"]];
 	var ws_name = this.GetSheetTitle(data.results[0].Role.Title, 'sheetName');
-
+	var sheetTitle = this.GetSheetTitle(data.results[0].Role.Title);
 	// function Workbook() {
 	// 	if (!(this instanceof Workbook)) return new Workbook();
 	// 	this.SheetNames = [];
 	// 	this.Sheets = {};
 	// }
 
-	var wb = new G2G.Utilities.Workbook(), ws = sheet_from_array_of_arrays(data.results);
+	var wb = new G2G.Utilities.Workbook(), ws = sheet_from_array_of_arrays(data.results, sheetTitle);
 
 	wb.SheetNames.push(ws_name);
 	wb.Sheets[ws_name] = ws;
