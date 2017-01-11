@@ -54,6 +54,11 @@ G2G.Apps.ContentSection.prototype.GetSheetTitle = function (roleTitle, format) {
 };
 
 G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
+	function isSafariMac() {
+		var ua = navigator.userAgent;
+		return (ua.match(/Macintosh/) && (ua.match(/Safari/)));
+	}
+
 	function datenum(v, date1904) {
 		if (date1904) v + 1462;
 		var epoch = Date.parse(v);
@@ -162,14 +167,21 @@ G2G.Apps.ContentSection.prototype.WorksheetFromData = function (data) {
 	var ws_name = this.GetSheetTitle(data.results[0].Role.Title, 'sheetName');
 	var sheetTitle = this.GetSheetTitle(data.results[0].Role.Title);
 
-	var wb = new G2G.Utilities.Workbook(), ws = sheet_from_array_of_arrays(data.results, sheetTitle);
+	var ws = sheet_from_array_of_arrays(data.results, sheetTitle);
+	if (isSafariMac()) {
+		var csv = XLSX.utils.sheet_to_csv(ws);
+		// debugger;
+		saveAs(new Blob([csv], {type: "text/csv;charset=UTF-8"}),this.GetSheetTitle(data.results[0].Role.Title, "fileName") + ".csv");
+	} else {
+		var wb = new G2G.Utilities.Workbook();
+		wb.SheetNames.push(ws_name);
+		wb.Sheets[ws_name] = ws;
 
-	wb.SheetNames.push(ws_name);
-	wb.Sheets[ws_name] = ws;
+		var wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
 
-	var wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
+		saveAs(new Blob([G2G.Utilities.S2Abs(wbout)], { type: "application/octet-stream" }), this.GetSheetTitle(data.results[0].Role.Title, 'fileName') + ".xlsx");
+	}
 
-	saveAs(new Blob([G2G.Utilities.S2Abs(wbout)], { type: "application/octet-stream" }), this.GetSheetTitle(data.results[0].Role.Title, 'fileName') + ".xlsx");
 
 };
 
@@ -182,7 +194,7 @@ G2G.Apps.ContentSection.prototype.ExportWorksheetToExcel = function (ws, sheetTi
 };
 
 G2G.Apps.ContentSection.prototype.DownloadXLSX = function () {
-	debugger;
+	// debugger;
 	this.WorksheetFromData(this.RoleData);
 
 	// var ws = this.WorksheetFromData(this.RoleData);
